@@ -1,13 +1,17 @@
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
+html,
 body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  background: #11161b;
-  color: #e8edf0;
-  font-family: Arial, Helvetica, sans-serif;
   overflow: hidden;
+  background: #10161a;
+  color: #e7ecee;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 button {
@@ -15,625 +19,1013 @@ button {
   color: inherit;
 }
 
+#app {
+  width: 100%;
+  height: 100%;
+}
+
 .topbar {
-  height: 74px;
-  background: #171d23;
-  border-bottom: 1px solid #3a444d;
+  height: 70px;
   display: flex;
   align-items: center;
-  padding: 0 18px;
-  gap: 25px;
+  background: linear-gradient(#1b2329, #151c21);
+  border-bottom: 1px solid #465058;
   position: relative;
-  z-index: 20;
+  z-index: 100;
 }
 
-.logo {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  width: 275px;
+.brand {
+  width: 285px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.date {
+.brand strong {
+  font-size: 13px;
+  letter-spacing: 1.4px;
+}
+
+.brand span {
+  font-size: 8px;
+  color: #89949c;
+  letter-spacing: 2px;
+}
+
+.dateBox {
+  height: 70px;
+  min-width: 120px;
+  padding: 0 15px;
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 21px;
-  font-weight: bold;
+  border-left: 1px solid #333d44;
+  border-right: 1px solid #333d44;
 }
 
-#nextYear {
-  background: #27333d;
-  border: 1px solid #52606b;
-  padding: 9px 14px;
+.dateBox small {
+  font-size: 8px;
+  color: #89949c;
+}
+
+.dateBox b {
+  font-size: 20px;
+}
+
+.dateBox button {
+  width: 32px;
+  height: 32px;
+  background: #2d3a42;
+  border: 1px solid #59656d;
   cursor: pointer;
 }
 
-#nextYear:hover {
-  background: #34434f;
-}
-
-.resources {
+.topStats {
   display: flex;
   margin-left: auto;
   height: 100%;
 }
 
-.resources div {
+.topStats > div {
   min-width: 125px;
-  padding: 12px 18px;
-  border-left: 1px solid #303a43;
+  padding: 0 15px;
+  border-left: 1px solid #303a40;
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  flex-direction: column;
 }
 
-.resources small {
-  color: #8e9aa4;
-  font-size: 10px;
+.topStats small {
+  font-size: 8px;
+  color: #87939b;
   letter-spacing: 1px;
 }
 
-.resources b {
+.topStats b {
   margin-top: 5px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.game-layout {
-  height: calc(100vh - 74px);
+.mobileButton {
+  display: none;
+}
+
+.game {
+  height: calc(100% - 70px);
   display: flex;
 }
 
-.leftbar {
+.leftPanel {
   width: 76px;
-  background: #171d23;
-  border-right: 1px solid #3a444d;
+  flex-shrink: 0;
+  background: #161d22;
+  border-right: 1px solid #404b52;
+  z-index: 90;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  flex-direction: column;
   padding-top: 8px;
-  z-index: 15;
 }
 
-.tool {
-  width: 65px;
-  height: 66px;
+.sideButton {
+  width: 64px;
+  height: 62px;
+  margin-bottom: 3px;
   background: transparent;
   border: 0;
-  color: #8d99a3;
   cursor: pointer;
+  color: #8c979e;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5px;
+}
+
+.sideButton span {
   font-size: 20px;
 }
 
-.tool span {
-  font-size: 9px;
+.sideButton small {
+  font-size: 8px;
 }
 
-.tool:hover,
-.tool.active {
-  background: #28343e;
+.sideButton:hover,
+.sideButton.active {
+  background: #29353d;
   color: white;
 }
 
-.separator {
-  width: 45px;
-  border-top: 1px solid #3b454d;
-  margin: 7px;
+.buildButton {
+  color: #c4cda9;
 }
 
-.map-area {
-  flex: 1;
+.sideDivider {
+  width: 44px;
+  border-top: 1px solid #39434a;
+  margin: 8px 0;
+}
+
+#world {
   position: relative;
+  flex: 1;
   overflow: hidden;
-  background: #596c55;
+  background: #566b52;
+  touch-action: none;
+  cursor: grab;
+}
+
+#world.dragging {
+  cursor: grabbing;
+}
+
+#camera {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 #map {
-  width: 1800px;
-  height: 1200px;
+  width: 2200px;
+  height: 1500px;
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform-origin: center center;
   background:
-    radial-gradient(circle at 30% 25%, #708766 0, transparent 25%),
-    radial-gradient(circle at 70% 70%, #687d60 0, transparent 28%),
-    #64785d;
-  box-shadow: inset 0 0 100px rgba(0,0,0,.28);
-  transition: transform .25s ease;
+    radial-gradient(circle at 25% 20%, #81956f 0 7%, transparent 30%),
+    radial-gradient(circle at 80% 75%, #718563 0 6%, transparent 27%),
+    radial-gradient(circle at 60% 30%, #879a72 0 5%, transparent 25%),
+    #6f8463;
+  box-shadow: 0 0 130px rgba(0,0,0,.35);
 }
 
-#map::before {
+#map::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: .16;
+  opacity: .13;
   background-image:
-    radial-gradient(#26352c 1px, transparent 1px);
-  background-size: 14px 14px;
+    radial-gradient(#253329 1px, transparent 1px);
+  background-size: 16px 16px;
   pointer-events: none;
+}
+
+.terrain {
+  position: absolute;
+  border-radius: 50%;
+  opacity: .28;
+  filter: blur(4px);
+}
+
+.terrain1 {
+  width: 500px;
+  height: 240px;
+  left: 100px;
+  top: 100px;
+  background: #9a9e72;
+  transform: rotate(20deg);
+}
+
+.terrain2 {
+  width: 450px;
+  height: 200px;
+  left: 1600px;
+  top: 850px;
+  background: #8e9c6d;
+}
+
+.terrain3 {
+  width: 600px;
+  height: 260px;
+  left: 600px;
+  top: 1240px;
+  background: #536a4f;
 }
 
 .river {
   position: absolute;
-  width: 300px;
-  height: 1400px;
-  left: 820px;
-  top: -100px;
-  background: #557f98;
-  transform: rotate(12deg);
-  border-left: 12px solid rgba(255,255,255,.08);
-  border-right: 12px solid rgba(0,0,0,.08);
+  width: 310px;
+  height: 1800px;
+  left: 1030px;
+  top: -150px;
+  background:
+    linear-gradient(90deg,
+      rgba(255,255,255,.1),
+      transparent 15%,
+      rgba(255,255,255,.05) 50%,
+      transparent 85%);
+  background-color: #4f7991;
+  transform: rotate(9deg);
   border-radius: 48%;
-  opacity: .9;
+  opacity: .92;
+  box-shadow:
+    inset 12px 0 20px rgba(0,0,0,.08),
+    inset -12px 0 20px rgba(255,255,255,.05);
 }
 
 .district {
   position: absolute;
-  border: 2px solid rgba(255,255,255,.22);
-  background: rgba(122,135,103,.24);
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(78,91,70,.18);
+  z-index: 1;
 }
 
-.downtown {
-  width: 500px;
-  height: 430px;
-  left: 610px;
-  top: 360px;
-  background: rgba(98,105,91,.35);
-}
-
-.north {
-  width: 530px;
-  height: 300px;
-  left: 560px;
-  top: 40px;
-}
-
-.south {
-  width: 600px;
-  height: 300px;
-  left: 560px;
-  top: 820px;
-}
-
-.west {
-  width: 500px;
-  height: 500px;
-  left: 60px;
-  top: 380px;
-}
-
-.east {
-  width: 480px;
-  height: 500px;
-  left: 1170px;
-  top: 380px;
-}
-
-.district-name {
+.district > span {
   position: absolute;
-  top: 10px;
-  left: 12px;
-  color: rgba(255,255,255,.28);
-  font-size: 12px;
+  top: 15px;
+  left: 18px;
+  font-size: 10px;
   letter-spacing: 3px;
+  color: rgba(255,255,255,.25);
 }
 
-.road {
-  position: absolute;
-  background: #6e6e69;
-  border: 2px solid #565650;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.08);
+.d-center {
+  width: 700px;
+  height: 520px;
+  left: 750px;
+  top: 480px;
 }
 
-.r1 {
-  width: 1700px;
-  height: 30px;
-  left: 50px;
-  top: 570px;
-  transform: rotate(-7deg);
+.d-north {
+  width: 760px;
+  height: 370px;
+  left: 690px;
+  top: 80px;
 }
 
-.r2 {
-  width: 1500px;
-  height: 26px;
-  left: 170px;
-  top: 690px;
-  transform: rotate(18deg);
+.d-west {
+  width: 600px;
+  height: 570px;
+  left: 80px;
+  top: 430px;
 }
 
-.r3 {
-  width: 30px;
-  height: 1100px;
-  left: 900px;
-  top: 50px;
-  transform: rotate(8deg);
+.d-east {
+  width: 560px;
+  height: 590px;
+  left: 1470px;
+  top: 400px;
 }
 
-.r4 {
-  width: 24px;
-  height: 900px;
-  left: 1130px;
-  top: 160px;
-  transform: rotate(-22deg);
+.d-south {
+  width: 790px;
+  height: 350px;
+  left: 650px;
+  top: 1050px;
 }
 
+/* Straßen */
+
+.street,
+.avenue,
 .rail {
   position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.street {
   height: 12px;
-  background: #303438;
-  border-top: 3px solid #a7a7a0;
-  border-bottom: 3px solid #a7a7a0;
+  background: #7b7b73;
+  border-top: 2px solid #96958b;
+  border-bottom: 2px solid #5c5d58;
+  opacity: .92;
+}
+
+.street1 {
+  width: 1000px;
+  left: 450px;
+  top: 570px;
+  transform: rotate(-9deg);
+}
+
+.street2 {
+  width: 950px;
+  left: 600px;
+  top: 760px;
+  transform: rotate(12deg);
+}
+
+.street3 {
+  width: 620px;
+  left: 150px;
+  top: 640px;
+  transform: rotate(-4deg);
+}
+
+.street4 {
+  width: 600px;
+  left: 1380px;
+  top: 650px;
+  transform: rotate(5deg);
+}
+
+.street5 {
+  width: 700px;
+  left: 770px;
+  top: 330px;
+  transform: rotate(17deg);
+}
+
+.street6 {
+  width: 620px;
+  left: 760px;
+  top: 960px;
+  transform: rotate(-15deg);
+}
+
+.street7 {
+  width: 500px;
+  left: 270px;
+  top: 820px;
+  transform: rotate(25deg);
+}
+
+.street8 {
+  width: 550px;
+  left: 1400px;
+  top: 900px;
+  transform: rotate(-23deg);
+}
+
+.avenue {
+  background: #666761;
+  border-top: 3px solid #aaa99d;
+  border-bottom: 3px solid #4f504c;
+}
+
+.avenue1 {
+  width: 2100px;
+  height: 24px;
+  left: 50px;
+  top: 790px;
+  transform: rotate(-6deg);
+}
+
+.avenue2 {
+  width: 1500px;
+  height: 22px;
+  left: 350px;
+  top: 600px;
+  transform: rotate(15deg);
+}
+
+.avenue3 {
+  width: 22px;
+  height: 1250px;
+  left: 1120px;
+  top: 100px;
+  transform: rotate(9deg);
+}
+
+/* Bahn */
+
+.rail {
+  height: 11px;
+  background: #292d2f;
+  border-top: 3px solid #aaa99f;
+  border-bottom: 3px solid #aaa99f;
 }
 
 .rail1 {
-  width: 1700px;
-  left: 60px;
-  top: 760px;
-  transform: rotate(-12deg);
+  width: 1900px;
+  left: 150px;
+  top: 1000px;
+  transform: rotate(-11deg);
 }
 
 .rail2 {
   width: 1200px;
-  left: 300px;
-  top: 300px;
-  transform: rotate(23deg);
+  left: 480px;
+  top: 250px;
+  transform: rotate(26deg);
 }
 
-.map-label {
+/* Stadtblöcke */
+
+.block {
   position: absolute;
-  background: rgba(20,27,25,.78);
-  border: 1px solid rgba(255,255,255,.18);
-  color: white;
-  padding: 9px 13px;
-  text-align: left;
-  cursor: pointer;
-  min-width: 145px;
+  background: rgba(77,82,73,.45);
+  border: 1px solid rgba(255,255,255,.12);
+  z-index: 3;
 }
 
-.map-label:hover {
-  background: rgba(25,35,32,.95);
-  border-color: #c9d3b7;
-}
+.b1 { left: 820px; top: 530px; width: 130px; height: 90px; }
+.b2 { left: 1000px; top: 510px; width: 130px; height: 105px; }
+.b3 { left: 1180px; top: 550px; width: 120px; height: 90px; }
+.b4 { left: 850px; top: 690px; width: 140px; height: 100px; }
+.b5 { left: 1030px; top: 690px; width: 150px; height: 100px; }
+.b6 { left: 1220px; top: 700px; width: 120px; height: 100px; }
+.b7 { left: 850px; top: 850px; width: 130px; height: 90px; }
+.b8 { left: 1030px; top: 850px; width: 145px; height: 95px; }
+.b9 { left: 1210px; top: 850px; width: 130px; height: 90px; }
+.b10 { left: 350px; top: 570px; width: 120px; height: 90px; }
+.b11 { left: 470px; top: 700px; width: 130px; height: 95px; }
+.b12 { left: 1580px; top: 560px; width: 130px; height: 90px; }
+.b13 { left: 1690px; top: 710px; width: 125px; height: 100px; }
+.b14 { left: 700px; top: 1120px; width: 150px; height: 100px; }
 
-.map-label b,
-.map-label small {
-  display: block;
-}
-
-.map-label b {
-  font-size: 11px;
-  letter-spacing: 1px;
-}
-
-.map-label small {
-  margin-top: 4px;
-  color: #aab5ac;
-  font-size: 9px;
-}
-
-.label-center {
-  left: 760px;
-  top: 550px;
-}
-
-.label-north {
-  left: 760px;
-  top: 170px;
-}
-
-.label-south {
-  left: 760px;
-  top: 930px;
-}
-
-.label-west {
-  left: 180px;
-  top: 570px;
-}
-
-.label-east {
-  left: 1270px;
-  top: 570px;
-}
+/* Gebäude */
 
 .building {
   position: absolute;
-  width: 48px;
-  height: 48px;
-  background: #242b30;
-  border: 2px solid rgba(255,255,255,.4);
-  box-shadow: 4px 5px 8px rgba(0,0,0,.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 23px;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255,255,255,.45);
+  box-shadow:
+    4px 6px 10px rgba(0,0,0,.38),
+    inset 0 1px rgba(255,255,255,.18);
+  color: white;
   cursor: pointer;
-  z-index: 5;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  border-radius: 2px;
+  transition: transform .12s;
 }
 
-.building:hover {
-  transform: scale(1.15);
-  z-index: 10;
+.building:hover,
+.building:active {
+  transform: translateY(-4px) scale(1.08);
+  z-index: 50;
 }
 
 .building.housing {
-  background: #765d50;
+  width: 48px;
+  height: 62px;
+  background: linear-gradient(135deg,#8b7060,#55483f);
 }
 
 .building.industry {
-  background: #50555a;
+  width: 76px;
+  height: 52px;
+  background: linear-gradient(135deg,#60666a,#343a3e);
 }
 
 .building.school {
-  background: #4f6875;
+  width: 62px;
+  height: 48px;
+  background: linear-gradient(135deg,#657f89,#40545d);
 }
 
 .building.hospital {
-  background: #754f55;
+  width: 64px;
+  height: 52px;
+  background: linear-gradient(135deg,#865d61,#513b3e);
 }
 
 .building.research {
-  background: #514d72;
+  width: 62px;
+  height: 62px;
+  background: linear-gradient(135deg,#665f8a,#403c59);
 }
 
 .building.energy {
-  background: #77703d;
+  width: 75px;
+  height: 45px;
+  background: linear-gradient(135deg,#877d3e,#504c2d);
 }
 
-.right-panel {
-  width: 310px;
-  background: #171d23;
-  border-left: 1px solid #3a444d;
+/* Panels */
+
+.rightPanel {
+  width: 330px;
+  flex-shrink: 0;
+  background: #171e23;
+  border-left: 1px solid #404a51;
   overflow-y: auto;
-  z-index: 15;
+  z-index: 90;
 }
 
-.panel-title {
+.panelHeader {
   padding: 20px;
-  border-bottom: 1px solid #303a42;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  border-bottom: 1px solid #323c43;
 }
 
-.panel-title span {
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  color: #a9b3ba;
+.panelHeader small {
+  color: #87939b;
+  font-size: 8px;
+  letter-spacing: 2px;
 }
 
-.panel-title small {
-  font-size: 19px;
-  font-weight: bold;
-}
-
-.stat {
-  display: flex;
-  justify-content: space-between;
-  padding: 13px 20px;
-  border-bottom: 1px solid #293139;
-  font-size: 12px;
-}
-
-.stat span {
-  color: #8f9ba4;
-}
-
-.right-panel hr {
-  border: 0;
-  border-top: 1px solid #343e46;
-  margin: 18px 0;
-}
-
-.right-panel h3 {
-  padding: 0 20px;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: #8f9ba4;
-}
-
-.project-mini {
-  margin: 8px 15px;
-  padding: 12px;
-  border: 1px solid #37434c;
-  background: #202930;
-}
-
-.project-mini b {
-  display: block;
-  font-size: 12px;
-}
-
-.project-mini small {
-  color: #89959d;
-}
-
-.map-controls {
-  position: absolute;
-  left: 18px;
-  bottom: 18px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 3px 12px #0006;
-}
-
-.map-controls button {
-  width: 40px;
-  height: 40px;
-  background: #1b2228;
-  border: 1px solid #45515a;
-  cursor: pointer;
+.panelHeader h2 {
+  margin: 7px 0 0;
   font-size: 22px;
 }
 
-.map-mode {
-  position: absolute;
-  bottom: 18px;
-  left: 75px;
-  background: #1b2228;
-  border: 1px solid #45515a;
-  display: flex;
-}
-
-.mode {
-  background: transparent;
-  border: 0;
-  padding: 10px 13px;
-  font-size: 10px;
-  cursor: pointer;
-  color: #9aa5ad;
-}
-
-.mode.active,
-.mode:hover {
-  background: #34414a;
-  color: white;
-}
-
-.build-menu {
-  position: fixed;
-  left: 90px;
-  bottom: 20px;
-  width: 390px;
-  background: #171d23;
-  border: 1px solid #56616a;
-  box-shadow: 0 10px 35px #0009;
-  z-index: 100;
-}
-
-.build-header {
-  height: 50px;
-  padding: 0 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #343e46;
-  font-size: 11px;
-  letter-spacing: 1.5px;
-}
-
-.build-header button {
-  background: transparent;
-  border: 0;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.build-option {
-  width: 100%;
-  min-height: 65px;
-  border: 0;
-  border-bottom: 1px solid #2c363e;
-  background: #1c242a;
+.quickStats {
   display: grid;
-  grid-template-columns: 45px 1fr auto;
-  align-items: center;
-  text-align: left;
-  padding: 8px 13px;
-  cursor: pointer;
+  grid-template-columns: 1fr 1fr;
 }
 
-.build-option:hover {
-  background: #2a353d;
+.quickStats div {
+  min-height: 75px;
+  padding: 13px;
+  border-right: 1px solid #2f393f;
+  border-bottom: 1px solid #2f393f;
 }
 
-.build-option > span {
-  font-size: 25px;
-}
-
-.build-option b,
-.build-option small {
+.quickStats small {
   display: block;
+  font-size: 7px;
+  color: #839098;
+  letter-spacing: .8px;
 }
 
-.build-option b {
-  font-size: 12px;
+.quickStats strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 16px;
 }
 
-.build-option small {
-  color: #87939c;
+.panelSection {
+  padding: 20px;
+  border-bottom: 1px solid #303a41;
+}
+
+.sectionTitle {
+  color: #8e9aa1;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+}
+
+.barStat {
+  display: grid;
+  grid-template-columns: 85px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0;
+  font-size: 10px;
+}
+
+.barStat > div {
+  height: 5px;
+  background: #30393f;
+}
+
+.barStat i {
+  display: block;
+  height: 100%;
+  background: #84906e;
+}
+
+.barStat b {
+  font-size: 9px;
+  text-align: right;
+}
+
+.project {
+  padding: 11px;
+  background: #20292f;
+  border: 1px solid #39444b;
+  margin-bottom: 7px;
+}
+
+.project b {
+  font-size: 10px;
+}
+
+.project small {
+  display: block;
+  color: #89959c;
   margin-top: 4px;
 }
 
-.build-option strong {
-  font-size: 10px;
-  color: #c3cdb9;
+.districtRows > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #303a40;
+  font-size: 11px;
+}
+
+.districtRows span {
+  color: #89959c;
+}
+
+.backButton {
+  margin: 18px;
+  border: 0;
+  background: transparent;
+  color: #a3adb3;
+  cursor: pointer;
+}
+
+.buildingBigIcon {
+  font-size: 60px;
+  padding: 25px;
+  background: #20292e;
+  text-align: center;
+}
+
+#buildingDetails {
+  padding: 20px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid #303a40;
+  font-size: 11px;
+}
+
+.detailRow span {
+  color: #89959c;
 }
 
 .hidden {
   display: none !important;
 }
 
-#districtPanel {
-  padding: 20px;
-}
+/* Karte Controls */
 
-#districtPanel > button {
-  background: transparent;
-  border: 0;
-  color: #9eabb3;
-  cursor: pointer;
-  margin-bottom: 25px;
-}
-
-#districtPanel h2 {
-  margin-top: 0;
-}
-
-.district-stat {
+.mapControls {
+  position: absolute;
+  bottom: 20px;
+  left: 18px;
   display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #303a42;
-  padding: 14px 0;
+  flex-direction: column;
+  z-index: 70;
+  box-shadow: 0 5px 20px rgba(0,0,0,.4);
 }
 
-#notification {
+.mapControls button {
+  width: 43px;
+  height: 43px;
+  background: #1a2228;
+  border: 1px solid #4a555d;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.mapModes {
+  position: absolute;
+  bottom: 20px;
+  left: 75px;
+  display: flex;
+  background: #1a2228;
+  border: 1px solid #4a555d;
+  z-index: 70;
+}
+
+.mapMode {
+  border: 0;
+  border-right: 1px solid #354047;
+  background: transparent;
+  padding: 11px 14px;
+  font-size: 9px;
+  color: #9aa5ab;
+  cursor: pointer;
+}
+
+.mapMode.active {
+  background: #344149;
+  color: white;
+}
+
+#coordinates {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: rgba(20,27,31,.82);
+  border: 1px solid #46525a;
+  padding: 8px 11px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #aab3b8;
+  z-index: 70;
+}
+
+/* Bauen */
+
+.buildMenu {
   position: fixed;
-  bottom: 25px;
-  right: 340px;
-  padding: 12px 18px;
-  background: #182127;
-  border: 1px solid #65727a;
-  box-shadow: 0 5px 20px #0008;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s;
+  left: 95px;
+  bottom: 18px;
+  width: 420px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: #171e23;
+  border: 1px solid #536068;
+  box-shadow: 0 12px 40px rgba(0,0,0,.65);
   z-index: 200;
 }
 
-#notification.show {
-  opacity: 1;
+.buildMenuHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: 17px;
+  border-bottom: 1px solid #354047;
 }
 
+.buildMenuHeader small {
+  color: #87939a;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+}
+
+.buildMenuHeader h2 {
+  margin: 5px 0 0;
+  font-size: 19px;
+}
+
+.buildMenuHeader button {
+  background: transparent;
+  border: 0;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.buildHint {
+  color: #929da3;
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 0 17px;
+}
+
+.buildCards {
+  padding: 10px;
+}
+
+.buildCard {
+  width: 100%;
+  min-height: 67px;
+  margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: 55px 1fr auto;
+  align-items: center;
+  text-align: left;
+  border: 1px solid #354149;
+  background: #20292f;
+  cursor: pointer;
+  padding: 8px 11px;
+}
+
+.buildCard:hover {
+  background: #2d3940;
+}
+
+.buildCard .icon {
+  font-size: 28px;
+}
+
+.buildCard b,
+.buildCard small {
+  display: block;
+}
+
+.buildCard b {
+  font-size: 11px;
+}
+
+.buildCard small {
+  color: #89959c;
+  font-size: 9px;
+  margin-top: 4px;
+}
+
+.buildCard strong {
+  font-size: 9px;
+  color: #c2caad;
+}
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 35px;
+  transform: translateX(-50%) translateY(20px);
+  background: #182126;
+  border: 1px solid #657078;
+  padding: 12px 18px;
+  font-size: 11px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s;
+  z-index: 500;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Kartenmodi */
+
 .mode-population #map {
-  filter: saturate(.65);
+  filter: saturate(.65) brightness(1.04);
 }
 
 .mode-economy #map {
-  filter: sepia(.25) saturate(1.25);
+  filter: saturate(1.3) sepia(.15);
+}
+
+.mode-transport #map .street,
+.mode-transport #map .avenue,
+.mode-transport #map .rail {
+  filter: brightness(1.5);
 }
 
 .mode-energy #map {
-  filter: brightness(1.08) saturate(1.2);
+  filter: saturate(1.35) brightness(1.08);
 }
 
-@media (max-width: 1000px) {
-  .right-panel {
-    width: 260px;
+/* Handy */
+
+@media (max-width: 900px) {
+
+  .topbar {
+    height: 58px;
   }
 
-  .resources div {
+  .brand {
+    width: auto;
+    padding-left: 12px;
+  }
+
+  .brand strong {
+    font-size: 10px;
+  }
+
+  .brand span {
+    display: none;
+  }
+
+  .dateBox {
+    height: 58px;
     min-width: 90px;
-    padding: 8px;
+    padding: 0 8px;
   }
 
-  .logo {
-    width: 190px;
+  .dateBox b {
+    font-size: 16px;
+  }
+
+  .topStats {
+    display: none;
+  }
+
+  .mobileButton {
+    display: block;
+    margin-left: auto;
+    margin-right: 8px;
+    width: 40px;
+    height: 40px;
+    background: #28343b;
+    border: 1px solid #526069;
+  }
+
+  .game {
+    height: calc(100% - 58px);
+  }
+
+  .leftPanel {
+    position: absolute;
+    left: 0;
+    top: 58px;
+    bottom: 0;
+    width: 62px;
+    transform: translateX(-100%);
+    transition: transform .2s;
+  }
+
+  .leftPanel.open {
+    transform: translateX(0);
+  }
+
+  .rightPanel {
+    position: absolute;
+    right: 0;
+    top: 58px;
+    bottom: 0;
+    width: min(88vw,330px);
+    transform: translateX(100%);
+    transition: transform .2s;
+  }
+
+  .rightPanel.open {
+    transform: translateX(0);
+  }
+
+  #world {
+    width: 100%;
+  }
+
+  .mapModes {
+    left: 10px;
+    right: 10px;
+    bottom: 12px;
+    overflow-x: auto;
+  }
+
+  .mapMode {
+    white-space: nowrap;
+    padding: 10px 12px;
+  }
+
+  .mapControls {
+    left: 10px;
+    bottom: 65px;
+  }
+
+  .buildMenu {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 80vh;
+  }
+
+  .buildCard {
+    min-height: 60px;
+  }
+
+  #coordinates {
+    top: 10px;
+    left: 10px;
+  }
+
+  .building {
+    transform: scale(.9);
+  }
+}
+
+@media (max-width: 500px) {
+
+  .brand strong {
+    max-width: 145px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dateBox {
+    min-width: 82px;
+  }
+
+  .dateBox small {
+    display: none;
+  }
+
+  .mapModes {
+    bottom: 8px;
+  }
+
+  .mapMode {
+    font-size: 8px;
+    padding: 9px 10px;
+  }
+
+  .buildMenu {
+    max-height: 86vh;
   }
 }
