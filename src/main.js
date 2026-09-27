@@ -1,16 +1,66 @@
 const app = document.querySelector("#app");
 
 const cities = {
-  Berlin: { population: 3669000, area: 891, gdp: 180e9, unemployment: 0.09 },
-  Hamburg: { population: 1900000, area: 755, gdp: 150e9, unemployment: 0.07 },
-  München: { population: 1600000, area: 311, gdp: 130e9, unemployment: 0.04 },
-  Köln: { population: 1100000, area: 405, gdp: 80e9, unemployment: 0.08 },
-  Frankfurt: { population: 780000, area: 248, gdp: 85e9, unemployment: 0.06 },
-  Stuttgart: { population: 640000, area: 207, gdp: 70e9, unemployment: 0.05 },
-  Leipzig: { population: 630000, area: 298, gdp: 25e9, unemployment: 0.08 },
-  Dresden: { population: 570000, area: 328, gdp: 24e9, unemployment: 0.07 },
-  Nürnberg: { population: 530000, area: 186, gdp: 28e9, unemployment: 0.06 },
-  Dortmund: { population: 610000, area: 281, gdp: 27e9, unemployment: 0.10 }
+  Berlin: {
+    population: 3669000,
+    area: 891,
+    gdp: 180e9,
+    unemployment: 0.09
+  },
+  Hamburg: {
+    population: 1900000,
+    area: 755,
+    gdp: 150e9,
+    unemployment: 0.07
+  },
+  München: {
+    population: 1600000,
+    area: 311,
+    gdp: 130e9,
+    unemployment: 0.04
+  },
+  Köln: {
+    population: 1100000,
+    area: 405,
+    gdp: 80e9,
+    unemployment: 0.08
+  },
+  Frankfurt: {
+    population: 780000,
+    area: 248,
+    gdp: 85e9,
+    unemployment: 0.06
+  },
+  Stuttgart: {
+    population: 640000,
+    area: 207,
+    gdp: 70e9,
+    unemployment: 0.05
+  },
+  Leipzig: {
+    population: 630000,
+    area: 298,
+    gdp: 25e9,
+    unemployment: 0.08
+  },
+  Dresden: {
+    population: 570000,
+    area: 328,
+    gdp: 24e9,
+    unemployment: 0.07
+  },
+  Nürnberg: {
+    population: 530000,
+    area: 186,
+    gdp: 28e9,
+    unemployment: 0.06
+  },
+  Dortmund: {
+    population: 610000,
+    area: 281,
+    gdp: 27e9,
+    unemployment: 0.10
+  }
 };
 
 const euro = n =>
@@ -20,369 +70,468 @@ const euro = n =>
     maximumFractionDigits: 0
   }).format(n);
 
-const num = n =>
+const number = n =>
   new Intl.NumberFormat("de-DE", {
     maximumFractionDigits: 0
   }).format(n);
 
+const percent = n =>
+  `${(n * 100).toFixed(1)}%`;
+
 let game = null;
+let canvas = null;
+let ctx = null;
+
+const BUILDINGS = {
+  house: {
+    name: "Wohngebiet",
+    icon: "🏠",
+    cost: 500e6,
+    size: 42,
+    housing: 10000,
+    population: 3000
+  },
+
+  industry: {
+    name: "Industriepark",
+    icon: "🏭",
+    cost: 1e9,
+    size: 58,
+    jobs: 8000,
+    gdp: 800e6,
+    energy: 0.8,
+    transport: -1
+  },
+
+  school: {
+    name: "Schule",
+    icon: "🏫",
+    cost: 30e6,
+    size: 48,
+    education: 2
+  },
+
+  hospital: {
+    name: "Krankenhaus",
+    icon: "🏥",
+    cost: 500e6,
+    size: 55,
+    health: 3
+  },
+
+  station: {
+    name: "Bahnhof",
+    icon: "🚉",
+    cost: 300e6,
+    size: 58,
+    transport: 4
+  },
+
+  energy: {
+    name: "Solarkraftwerk",
+    icon: "☀️",
+    cost: 1e9,
+    size: 55,
+    energyProduction: 1.5
+  },
+
+  research: {
+    name: "Forschungszentrum",
+    icon: "🔬",
+    cost: 500e6,
+    size: 52,
+    education: 3,
+    gdp: 50e6
+  },
+
+  road: {
+    name: "Straße",
+    icon: "🛣️",
+    cost: 10e6,
+    size: 0
+  }
+};
 
 /* =========================
-   START
+   START SCREEN
 ========================= */
 
-function startScreen() {
+function renderStart() {
   app.innerHTML = `
-    <div class="start">
-      <h1>Vom Nichts zur Metropole</h1>
+    <div class="start-screen">
+      <div class="start-card">
 
-      <p>
-        Baue eine deutsche Stadt über Jahrzehnte
-        zu einer modernen Metropole aus.
-      </p>
+        <div class="logo">
+          Vom Nichts zur Metropole
+        </div>
 
-      <label>
-        Startstadt
-        <select id="city">
-          ${Object.keys(cities)
-            .map(c => `<option value="${c}">${c}</option>`)
-            .join("")}
-        </select>
-      </label>
+        <div class="subtitle">
+          Baue eine deutsche Stadt von Grund auf aus.
+          Entwickle Wirtschaft, Bevölkerung, Infrastruktur,
+          Energie, Bildung und Lebensqualität über Jahrzehnte.
+        </div>
 
-      <div id="cityInfo" class="panel"></div>
+        <div class="form-grid">
 
-      <label>
-        Privates Startvermögen
-        <select id="capital">
-          <option value="1000000000">1 Mrd. €</option>
-          <option value="10000000000">10 Mrd. €</option>
-          <option value="100000000000">100 Mrd. €</option>
-          <option value="300000000000">300 Mrd. €</option>
-        </select>
-      </label>
+          <label class="form-field full">
+            <span>Startstadt</span>
+            <select id="citySelect">
+              ${Object.keys(cities)
+                .map(city =>
+                  `<option value="${city}">${city}</option>`
+                )
+                .join("")}
+            </select>
+          </label>
 
-      <label>
-        Öffentliches Jahresbudget
-        <select id="budget">
-          <option value="500000000">500 Mio. €</option>
-          <option value="2000000000">2 Mrd. €</option>
-          <option value="5000000000">5 Mrd. €</option>
-          <option value="10000000000">10 Mrd. €</option>
-        </select>
-      </label>
+          <label class="form-field">
+            <span>Privates Startvermögen</span>
+            <select id="capitalSelect">
+              <option value="1e9">1 Mrd. €</option>
+              <option value="1e10">10 Mrd. €</option>
+              <option value="1e11">100 Mrd. €</option>
+              <option value="3e11">300 Mrd. €</option>
+            </select>
+          </label>
 
-      <label>
-        Schwierigkeit
-        <select id="difficulty">
-          <option value="normal">Normal</option>
-          <option value="hard">Schwer</option>
-          <option value="extreme">Extrem</option>
-        </select>
-      </label>
+          <label class="form-field">
+            <span>Jährliches Budget</span>
+            <select id="budgetSelect">
+              <option value="5e8">500 Mio. €</option>
+              <option value="2e9">2 Mrd. €</option>
+              <option value="5e9">5 Mrd. €</option>
+              <option value="1e10">10 Mrd. €</option>
+            </select>
+          </label>
 
-      <button id="startGame">
-        Stadt gründen
-      </button>
+          <label class="form-field full">
+            <span>Schwierigkeit</span>
+            <select id="difficultySelect">
+              <option value="normal">Normal</option>
+              <option value="hard">Schwer</option>
+              <option value="extreme">Extrem</option>
+            </select>
+          </label>
+
+        </div>
+
+        <div id="cityPreview" class="city-preview"></div>
+
+        <button id="startButton" class="primary">
+          Stadt gründen
+        </button>
+
+      </div>
     </div>
   `;
 
-  const updateCity = () => {
-    const city = document.querySelector("#city").value;
-    const c = cities[city];
+  const updatePreview = () => {
+    const city =
+      cities[
+        document.querySelector("#citySelect").value
+      ];
 
-    document.querySelector("#cityInfo").innerHTML = `
+    document.querySelector("#cityPreview").innerHTML = `
       <h3>Ausgangslage</h3>
-      <p>Einwohner: <b>${num(c.population)}</b></p>
-      <p>Fläche: <b>${num(c.area)} km²</b></p>
-      <p>Wirtschaftsleistung: <b>${euro(c.gdp)}</b></p>
-      <p>Arbeitslosigkeit: <b>${(c.unemployment * 100).toFixed(1)}%</b></p>
+
+      <div class="preview-grid">
+
+        <div class="preview-stat">
+          <small>Einwohner</small>
+          <strong>${number(city.population)}</strong>
+        </div>
+
+        <div class="preview-stat">
+          <small>Fläche</small>
+          <strong>${number(city.area)} km²</strong>
+        </div>
+
+        <div class="preview-stat">
+          <small>BIP</small>
+          <strong>${euro(city.gdp)}</strong>
+        </div>
+
+        <div class="preview-stat">
+          <small>Arbeitslosigkeit</small>
+          <strong>${percent(city.unemployment)}</strong>
+        </div>
+
+      </div>
     `;
   };
 
   document
-    .querySelector("#city")
-    .addEventListener("change", updateCity);
+    .querySelector("#citySelect")
+    .addEventListener("change", updatePreview);
 
-  updateCity();
+  updatePreview();
 
   document
-    .querySelector("#startGame")
-    .addEventListener("click", () => {
-
-      const cityName =
-        document.querySelector("#city").value;
-
-      const c = cities[cityName];
-
-      game = {
-        city: cityName,
-        year: 2026,
-
-        population: c.population,
-        gdp: c.gdp,
-        unemployment: c.unemployment,
-
-        money:
-          Number(document.querySelector("#capital").value),
-
-        budget:
-          Number(document.querySelector("#budget").value),
-
-        debt: 0,
-
-        housing:
-          Math.round(c.population * 0.52),
-
-        satisfaction: 72,
-        education: 65,
-        health: 70,
-
-        energyProduction: 12,
-        energyConsumption: 10,
-
-        transport: 60,
-
-        jobs:
-          Math.round(
-            c.population *
-            (1 - c.unemployment) *
-            0.55
-          ),
-
-        buildings: [],
-        roads: [],
-
-        selectedTool: "select",
-
-        camera: {
-          x: 0,
-          y: 0,
-          zoom: 1
-        }
-      };
-
-      createInitialCity();
-      dashboard();
-    });
+    .querySelector("#startButton")
+    .addEventListener("click", startGame);
 }
 
 /* =========================
-   INITIAL CITY
+   GAME CREATION
+========================= */
+
+function startGame() {
+  const cityName =
+    document.querySelector("#citySelect").value;
+
+  const city = cities[cityName];
+
+  game = {
+    city: cityName,
+    year: 2026,
+
+    population: city.population,
+    gdp: city.gdp,
+    unemployment: city.unemployment,
+
+    money: Number(
+      document.querySelector("#capitalSelect").value
+    ),
+
+    budget: Number(
+      document.querySelector("#budgetSelect").value
+    ),
+
+    debt: 0,
+
+    housing:
+      Math.round(city.population * 0.52),
+
+    jobs:
+      Math.round(
+        city.population *
+        (1 - city.unemployment) *
+        0.55
+      ),
+
+    satisfaction: 72,
+    education: 65,
+    health: 70,
+
+    energyProduction: 12,
+    energyConsumption: 10,
+
+    transport: 60,
+
+    buildings: [],
+    roads: [],
+
+    selectedTool: "select",
+
+    camera: {
+      x: 0,
+      y: 0,
+      zoom: 1
+    },
+
+    dragging: false,
+    lastMouseX: 0,
+    lastMouseY: 0,
+
+    selectedBuilding: null,
+
+    notifications: []
+  };
+
+  createInitialCity();
+  renderGame();
+}
+
+/* =========================
+   INITIAL MAP
 ========================= */
 
 function createInitialCity() {
-
   game.buildings = [];
+  game.roads = [];
 
   /*
-   Kleine Ausgangsstadt.
-   Die Gebäude werden auf der Karte
-   tatsächlich gezeichnet.
+    Wohngebiet
   */
 
-  for (let i = 0; i < 25; i++) {
-
-    game.buildings.push({
-      id: crypto.randomUUID(),
-      type: "house",
-      x: 350 + (i % 5) * 70,
-      y: 250 + Math.floor(i / 5) * 65,
-      level: 1
-    });
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 7; col++) {
+      game.buildings.push({
+        id: crypto.randomUUID(),
+        type: "house",
+        x: 290 + col * 58,
+        y: 250 + row * 55,
+        level: 1
+      });
+    }
   }
+
+  /*
+    Ausgangsinfrastruktur
+  */
 
   game.buildings.push({
     id: crypto.randomUUID(),
     type: "school",
-    x: 700,
-    y: 300,
+    x: 800,
+    y: 250,
     level: 1
   });
 
   game.buildings.push({
     id: crypto.randomUUID(),
     type: "hospital",
-    x: 800,
-    y: 450,
+    x: 820,
+    y: 500,
     level: 1
   });
 
   game.buildings.push({
     id: crypto.randomUUID(),
     type: "station",
-    x: 500,
-    y: 600,
+    x: 470,
+    y: 560,
     level: 1
   });
 
-  game.roads = [
-    {
-      x1: 100,
-      y1: 500,
-      x2: 1100,
-      y2: 500
-    },
-    {
-      x1: 500,
-      y1: 100,
-      x2: 500,
-      y2: 800
-    }
-  ];
+  /*
+    Hauptstraßen
+  */
+
+  game.roads.push({
+    x1: 100,
+    y1: 500,
+    x2: 1100,
+    y2: 500
+  });
+
+  game.roads.push({
+    x1: 500,
+    y1: 100,
+    x2: 500,
+    y2: 800
+  });
+
+  game.roads.push({
+    x1: 200,
+    y1: 250,
+    x2: 900,
+    y2: 250
+  });
 }
 
 /* =========================
-   DASHBOARD
+   MAIN UI
 ========================= */
 
-function dashboard() {
-
+function renderGame() {
   app.innerHTML = `
     <div class="game">
 
       <header class="topbar">
 
-        <div>
-          <strong>
-            VOM NICHTS ZUR METROPOLE
-          </strong>
-
-          <span>
-            ${game.city}
-          </span>
+        <div class="brand">
+          VOM NICHTS ZUR METROPOLE
+          <small>${game.city}</small>
         </div>
 
-        <div class="year">
-          Jahr ${game.year}
+        <div class="top-stats">
+
+          <div class="top-stat">
+            <small>Einwohner</small>
+            <strong>${number(game.population)}</strong>
+          </div>
+
+          <div class="top-stat">
+            <small>BIP</small>
+            <strong>${euro(game.gdp)}</strong>
+          </div>
+
+          <div class="top-stat">
+            <small>Geld</small>
+            <strong>${euro(game.money)}</strong>
+          </div>
+
+          <div class="top-stat">
+            <small>Zufriedenheit</small>
+            <strong>${game.satisfaction.toFixed(0)}%</strong>
+          </div>
+
         </div>
 
-        <button id="nextYear">
-          Jahr abschließen →
-        </button>
+        <div class="year-controls">
+
+          <button
+            class="icon-btn"
+            id="pauseButton">
+            ▶
+          </button>
+
+          <div class="year">
+            ${game.year}
+          </div>
+
+          <button
+            class="speed-btn"
+            id="nextYearButton">
+            Nächstes Jahr
+          </button>
+
+        </div>
 
       </header>
 
-      <div class="game-layout">
+      <div class="game-body">
 
         <aside class="sidebar">
 
-          ${[
-            "Übersicht",
-            "Bevölkerung",
-            "Finanzen",
-            "Wirtschaft",
-            "Bauen",
-            "Verkehr",
-            "Energie",
-            "Bildung",
-            "Gesundheit",
-            "Forschung",
-            "Karte"
-          ]
-            .map(
-              x =>
-                `<button class="side-button">${x}</button>`
-            )
-            .join("")}
+          ${navItems()}
 
         </aside>
 
-        <main class="main">
+        <main class="main-area">
 
-          <div class="stats">
+          <canvas id="cityMap"></canvas>
 
-            <div>
-              <small>BEVÖLKERUNG</small>
-              <b>${num(game.population)}</b>
-            </div>
+          <div class="map-label">
+            <h1>${game.city}</h1>
+            <span>Stadtgebiet · Jahr ${game.year}</span>
+          </div>
 
-            <div>
-              <small>BIP</small>
-              <b>${euro(game.gdp)}</b>
-            </div>
+          <div class="map-controls">
 
-            <div>
-              <small>BIP / KOPF</small>
-              <b>${euro(game.gdp / game.population)}</b>
-            </div>
+            <button
+              class="map-control"
+              id="zoomIn">
+              +
+            </button>
 
-            <div>
-              <small>VERMÖGEN</small>
-              <b>${euro(game.money)}</b>
-            </div>
+            <button
+              class="map-control"
+              id="zoomOut">
+              −
+            </button>
 
-            <div>
-              <small>SCHULDEN</small>
-              <b>${euro(game.debt)}</b>
-            </div>
-
-            <div>
-              <small>ARBEITSLOSIGKEIT</small>
-              <b>
-                ${(game.unemployment * 100).toFixed(1)}%
-              </b>
-            </div>
+            <button
+              class="map-control"
+              id="resetCamera">
+              ⌂
+            </button>
 
           </div>
 
-          <div class="city-view">
+          <div
+            id="inspector"
+            class="inspector">
+          </div>
 
-            <div class="map-toolbar">
+          <div
+            id="notifications"
+            class="notifications">
+          </div>
 
-              <button data-tool="select">
-                👆 Auswahl
-              </button>
-
-              <button data-tool="house">
-                🏠 Wohngebiet
-              </button>
-
-              <button data-tool="industry">
-                🏭 Industrie
-              </button>
-
-              <button data-tool="school">
-                🏫 Schule
-              </button>
-
-              <button data-tool="hospital">
-                🏥 Krankenhaus
-              </button>
-
-              <button data-tool="station">
-                🚉 Bahnhof
-              </button>
-
-              <button data-tool="energy">
-                ⚡ Kraftwerk
-              </button>
-
-              <button data-tool="research">
-                🔬 Forschung
-              </button>
-
-              <button data-tool="road">
-                🛣 Straße
-              </button>
-
-              <button id="zoomOut">
-                −
-              </button>
-
-              <button id="zoomIn">
-                +
-              </button>
-
-            </div>
-
-            <canvas id="cityMap"></canvas>
-
-            <div
-              id="buildingInfo"
-              class="building-info hidden">
-            </div>
-
+          <div class="build-menu">
+            ${buildTools()}
           </div>
 
         </main>
@@ -392,144 +541,272 @@ function dashboard() {
     </div>
   `;
 
-  document
-    .querySelector("#nextYear")
-    .addEventListener("click", nextYear);
-
-  document
-    .querySelectorAll("[data-tool]")
-    .forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        game.selectedTool =
-          button.dataset.tool;
-
-      });
-
-    });
-
-  document
-    .querySelector("#zoomIn")
-    .addEventListener("click", () => {
-
-      game.camera.zoom =
-        Math.min(
-          3,
-          game.camera.zoom + 0.2
-        );
-
-      drawMap();
-
-    });
-
-  document
-    .querySelector("#zoomOut")
-    .addEventListener("click", () => {
-
-      game.camera.zoom =
-        Math.max(
-          0.5,
-          game.camera.zoom - 0.2
-        );
-
-      drawMap();
-
-    });
-
-  setupCanvas();
-
-  drawMap();
-}
-
-/* =========================
-   CANVAS
-========================= */
-
-let canvas;
-let ctx;
-
-function setupCanvas() {
-
   canvas =
     document.querySelector("#cityMap");
 
   ctx =
     canvas.getContext("2d");
 
+  setupEvents();
   resizeCanvas();
+  drawMap();
+  renderNotifications();
+}
+
+/* =========================
+   NAV
+========================= */
+
+function navItems() {
+  const items = [
+    ["🏙️", "Übersicht"],
+    ["👥", "Bevölkerung"],
+    ["💶", "Finanzen"],
+    ["🏭", "Wirtschaft"],
+    ["🚧", "Bauen"],
+    ["🚇", "Verkehr"],
+    ["⚡", "Energie"],
+    ["🎓", "Bildung"],
+    ["🏥", "Gesundheit"],
+    ["🔬", "Forschung"],
+    ["🗺️", "Karte"]
+  ];
+
+  return items
+    .map(
+      ([icon, label], index) => `
+        <button
+          class="nav-item ${index === 0 ? "active" : ""}"
+          title="${label}">
+          <span class="nav-icon">${icon}</span>
+          ${label}
+        </button>
+      `
+    )
+    .join("");
+}
+
+/* =========================
+   BUILD TOOLS
+========================= */
+
+function buildTools() {
+  const types = [
+    "house",
+    "industry",
+    "school",
+    "hospital",
+    "station",
+    "energy",
+    "research",
+    "road"
+  ];
+
+  return types
+    .map(type => {
+      const b = BUILDINGS[type];
+
+      return `
+        <button
+          class="build-tool"
+          data-tool="${type}">
+
+          <span>${b.icon}</span>
+
+          ${b.name}
+
+          <div class="tool-price">
+            ${euro(b.cost)}
+          </div>
+
+        </button>
+      `;
+    })
+    .join("");
+}
+
+/* =========================
+   EVENTS
+========================= */
+
+function setupEvents() {
 
   window.addEventListener(
     "resize",
     resizeCanvas
   );
 
-  canvas.addEventListener(
-    "click",
-    handleMapClick
-  );
+  document
+    .querySelector("#zoomIn")
+    .addEventListener(
+      "click",
+      () => {
+        game.camera.zoom =
+          Math.min(
+            3,
+            game.camera.zoom + 0.2
+          );
 
-  let dragging = false;
-  let lastX = 0;
-  let lastY = 0;
+        drawMap();
+      }
+    );
+
+  document
+    .querySelector("#zoomOut")
+    .addEventListener(
+      "click",
+      () => {
+        game.camera.zoom =
+          Math.max(
+            0.5,
+            game.camera.zoom - 0.2
+          );
+
+        drawMap();
+      }
+    );
+
+  document
+    .querySelector("#resetCamera")
+    .addEventListener(
+      "click",
+      () => {
+
+        game.camera = {
+          x: 0,
+          y: 0,
+          zoom: 1
+        };
+
+        drawMap();
+      }
+    );
+
+  document
+    .querySelector("#nextYearButton")
+    .addEventListener(
+      "click",
+      nextYear
+    );
+
+  document
+    .querySelectorAll("[data-tool]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          game.selectedTool =
+            button.dataset.tool;
+
+          document
+            .querySelectorAll(
+              ".build-tool"
+            )
+            .forEach(b =>
+              b.classList.remove(
+                "active"
+              )
+            );
+
+          button.classList.add(
+            "active"
+          );
+        }
+      );
+    });
 
   canvas.addEventListener(
     "mousedown",
-    e => {
+    event => {
 
-      dragging = true;
+      game.dragging = true;
 
-      lastX = e.clientX;
-      lastY = e.clientY;
+      game.lastMouseX =
+        event.clientX;
+
+      game.lastMouseY =
+        event.clientY;
     }
   );
 
   window.addEventListener(
     "mouseup",
     () => {
-      dragging = false;
+      game.dragging = false;
     }
   );
 
   window.addEventListener(
     "mousemove",
-    e => {
+    event => {
 
-      if (!dragging)
+      if (!game.dragging)
         return;
 
       game.camera.x +=
-        e.clientX - lastX;
+        event.clientX -
+        game.lastMouseX;
 
       game.camera.y +=
-        e.clientY - lastY;
+        event.clientY -
+        game.lastMouseY;
 
-      lastX = e.clientX;
-      lastY = e.clientY;
+      game.lastMouseX =
+        event.clientX;
+
+      game.lastMouseY =
+        event.clientY;
 
       drawMap();
     }
   );
+
+  canvas.addEventListener(
+    "click",
+    handleMapClick
+  );
 }
+
+/* =========================
+   CANVAS
+========================= */
 
 function resizeCanvas() {
 
   if (!canvas)
     return;
 
+  const rect =
+    canvas.getBoundingClientRect();
+
   canvas.width =
-    canvas.clientWidth ||
-    1000;
+    Math.max(
+      1,
+      Math.floor(rect.width * devicePixelRatio)
+    );
 
   canvas.height =
-    canvas.clientHeight ||
-    650;
+    Math.max(
+      1,
+      Math.floor(rect.height * devicePixelRatio)
+    );
+
+  ctx.setTransform(
+    devicePixelRatio,
+    0,
+    0,
+    devicePixelRatio,
+    0,
+    0
+  );
 
   drawMap();
 }
 
 /* =========================
-   MAP DRAWING
+   MAP
 ========================= */
 
 function drawMap() {
@@ -537,83 +814,42 @@ function drawMap() {
   if (!canvas || !ctx)
     return;
 
-  const w = canvas.width;
-  const h = canvas.height;
+  const width =
+    canvas.clientWidth;
+
+  const height =
+    canvas.clientHeight;
 
   ctx.clearRect(
     0,
     0,
-    w,
-    h
+    width,
+    height
   );
 
   /*
-   Landschaft
+    Landschaft
   */
 
-  ctx.fillStyle = "#7fa36d";
+  ctx.fillStyle = "#78966c";
 
   ctx.fillRect(
     0,
     0,
-    w,
-    h
+    width,
+    height
   );
 
-  /*
-   Wasser
-  */
-
-  ctx.fillStyle = "#5c91bd";
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    w * 0.72,
-    0
+  drawWater(
+    width,
+    height
   );
-
-  ctx.bezierCurveTo(
-    w * 0.65,
-    h * 0.2,
-    w * 0.78,
-    h * 0.35,
-    w * 0.68,
-    h * 0.55
-  );
-
-  ctx.bezierCurveTo(
-    w * 0.58,
-    h * 0.72,
-    w * 0.72,
-    h * 0.85,
-    w * 0.63,
-    h
-  );
-
-  ctx.lineTo(
-    w,
-    h
-  );
-
-  ctx.lineTo(
-    w,
-    0
-  );
-
-  ctx.closePath();
-
-  ctx.fill();
-
-  /*
-   Kamera
-  */
 
   ctx.save();
 
   ctx.translate(
-    w / 2 + game.camera.x,
-    h / 2 + game.camera.y
+    width / 2 + game.camera.x,
+    height / 2 + game.camera.y
   );
 
   ctx.scale(
@@ -626,50 +862,139 @@ function drawMap() {
     -450
   );
 
+  drawTerrain();
+  drawRoads();
+  drawBuildings();
+
+  ctx.restore();
+
+  drawScale(width, height);
+}
+
+/* =========================
+   TERRAIN
+========================= */
+
+function drawTerrain() {
+
   /*
-   Grundstücksraster
+    dezentes Stadtgebiet
+  */
+
+  ctx.fillStyle =
+    "rgba(220,220,190,.10)";
+
+  ctx.fillRect(
+    120,
+    100,
+    950,
+    700
+  );
+
+  /*
+    Straßenblöcke
   */
 
   ctx.strokeStyle =
-    "rgba(255,255,255,.10)";
+    "rgba(255,255,255,.08)";
 
   ctx.lineWidth = 1;
 
   for (
-    let x = 0;
-    x < 1200;
+    let x = 100;
+    x < 1150;
     x += 50
   ) {
 
     ctx.beginPath();
 
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, 900);
+    ctx.moveTo(x, 100);
+    ctx.lineTo(x, 800);
 
     ctx.stroke();
   }
 
   for (
-    let y = 0;
-    y < 900;
+    let y = 100;
+    y < 800;
     y += 50
   ) {
 
     ctx.beginPath();
 
-    ctx.moveTo(0, y);
-    ctx.lineTo(1200, y);
+    ctx.moveTo(100, y);
+    ctx.lineTo(1150, y);
 
     ctx.stroke();
   }
+}
 
-  /*
-   Straßen
-  */
+/* =========================
+   WATER
+========================= */
+
+function drawWater(width, height) {
+
+  ctx.save();
+
+  ctx.fillStyle =
+    "rgba(68,133,177,.9)";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    width * .76,
+    0
+  );
+
+  ctx.bezierCurveTo(
+    width * .62,
+    height * .2,
+    width * .85,
+    height * .4,
+    width * .69,
+    height * .58
+  );
+
+  ctx.bezierCurveTo(
+    width * .57,
+    height * .75,
+    width * .75,
+    height * .87,
+    width * .63,
+    height
+  );
+
+  ctx.lineTo(
+    width,
+    height
+  );
+
+  ctx.lineTo(
+    width,
+    0
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* =========================
+   ROADS
+========================= */
+
+function drawRoads() {
 
   for (const road of game.roads) {
 
-    ctx.strokeStyle = "#4b4b4b";
+    ctx.lineCap = "round";
+
+    ctx.strokeStyle =
+      "#45484b";
+
     ctx.lineWidth = 28;
 
     ctx.beginPath();
@@ -686,12 +1011,14 @@ function drawMap() {
 
     ctx.stroke();
 
-    ctx.strokeStyle = "#b9b9b9";
+    ctx.strokeStyle =
+      "#c8c4a9";
+
     ctx.lineWidth = 2;
 
     ctx.setLineDash([
       12,
-      12
+      10
     ]);
 
     ctx.beginPath();
@@ -710,107 +1037,190 @@ function drawMap() {
 
     ctx.setLineDash([]);
   }
-
-  /*
-   Gebäude
-  */
-
-  for (
-    const building of game.buildings
-  ) {
-
-    drawBuilding(building);
-  }
-
-  /*
-   Stadtzentrum
-  */
-
-  ctx.fillStyle = "#eeeeee";
-
-  ctx.font =
-    "bold 24px Arial";
-
-  ctx.fillText(
-    game.city,
-    520,
-    80
-  );
-
-  ctx.restore();
 }
 
 /* =========================
    BUILDINGS
 ========================= */
 
-function drawBuilding(building) {
+function drawBuildings() {
 
-  const sizes = {
-    house: 35,
-    school: 55,
-    hospital: 65,
-    industry: 75,
-    station: 70,
-    energy: 70,
-    research: 60
-  };
+  for (const building of game.buildings) {
 
-  const emojis = {
-    house: "🏠",
-    school: "🏫",
-    hospital: "🏥",
-    industry: "🏭",
-    station: "🚉",
-    energy: "⚡",
-    research: "🔬"
-  };
+    const data =
+      BUILDINGS[building.type];
 
-  const size =
-    sizes[building.type] ||
-    40;
+    if (!data)
+      continue;
+
+    const size =
+      data.size;
+
+    /*
+      Schatten
+    */
+
+    ctx.fillStyle =
+      "rgba(0,0,0,.20)";
+
+    ctx.fillRect(
+      building.x + 7,
+      building.y + 8,
+      size,
+      size
+    );
+
+    /*
+      Gebäude
+    */
+
+    let buildingColor =
+      "#c8c5bb";
+
+    if (
+      building.type === "house"
+    )
+      buildingColor =
+        "#b99373";
+
+    if (
+      building.type === "industry"
+    )
+      buildingColor =
+        "#686d72";
+
+    if (
+      building.type === "school"
+    )
+      buildingColor =
+        "#d1b36c";
+
+    if (
+      building.type === "hospital"
+    )
+      buildingColor =
+        "#d7d7d7";
+
+    if (
+      building.type === "station"
+    )
+      buildingColor =
+        "#9a9da1";
+
+    if (
+      building.type === "energy"
+    )
+      buildingColor =
+        "#d0b84d";
+
+    if (
+      building.type === "research"
+    )
+      buildingColor =
+        "#a7c5d7";
+
+    ctx.fillStyle =
+      buildingColor;
+
+    ctx.fillRect(
+      building.x,
+      building.y,
+      size,
+      size
+    );
+
+    /*
+      Auswahl
+    */
+
+    if (
+      game.selectedBuilding ===
+      building.id
+    ) {
+
+      ctx.strokeStyle =
+        "#ffffff";
+
+      ctx.lineWidth = 3;
+
+      ctx.strokeRect(
+        building.x - 3,
+        building.y - 3,
+        size + 6,
+        size + 6
+      );
+    }
+
+    /*
+      Icon
+    */
+
+    ctx.font =
+      `${Math.max(
+        18,
+        size * .52
+      )}px Arial`;
+
+    ctx.textAlign =
+      "center";
+
+    ctx.textBaseline =
+      "middle";
+
+    ctx.fillText(
+      data.icon,
+      building.x + size / 2,
+      building.y + size / 2
+    );
+
+    ctx.textAlign =
+      "left";
+
+    ctx.textBaseline =
+      "alphabetic";
+  }
+}
+
+/* =========================
+   SCALE
+========================= */
+
+function drawScale() {
+
+  const width =
+    canvas.clientWidth;
+
+  const height =
+    canvas.clientHeight;
 
   ctx.fillStyle =
-    "rgba(0,0,0,.18)";
+    "rgba(15,20,24,.75)";
 
   ctx.fillRect(
-    building.x + 6,
-    building.y + 8,
-    size,
-    size
+    width - 120,
+    height - 35,
+    95,
+    22
   );
 
   ctx.fillStyle =
-    building.type === "industry"
-      ? "#777"
-      : building.type === "energy"
-      ? "#d7b52d"
-      : building.type === "house"
-      ? "#c9a27e"
-      : "#d5d5d5";
-
-  ctx.fillRect(
-    building.x,
-    building.y,
-    size,
-    size
-  );
+    "white";
 
   ctx.font =
-    `${Math.max(20, size * .55)}px Arial`;
+    "11px sans-serif";
 
   ctx.fillText(
-    emojis[building.type] || "🏢",
-    building.x + 5,
-    building.y + size - 10
+    "1 km",
+    width - 80,
+    height - 20
   );
 }
 
 /* =========================
-   MAP INTERACTION
+   COORDINATES
 ========================= */
 
-function mapCoordinates(event) {
+function screenToWorld(event) {
 
   const rect =
     canvas.getBoundingClientRect();
@@ -827,7 +1237,7 @@ function mapCoordinates(event) {
     x:
       (
         screenX -
-        canvas.width / 2 -
+        canvas.clientWidth / 2 -
         game.camera.x
       ) /
         game.camera.zoom +
@@ -836,7 +1246,7 @@ function mapCoordinates(event) {
     y:
       (
         screenY -
-        canvas.height / 2 -
+        canvas.clientHeight / 2 -
         game.camera.y
       ) /
         game.camera.zoom +
@@ -844,13 +1254,38 @@ function mapCoordinates(event) {
   };
 }
 
+/* =========================
+   MAP CLICK
+========================= */
+
 function handleMapClick(event) {
 
+  /*
+    Nicht bauen, wenn gerade
+    die Karte verschoben wurde.
+  */
+
+  if (
+    Math.abs(
+      event.clientX -
+      game.lastMouseX
+    ) > 5
+  )
+    return;
+
+  if (
+    Math.abs(
+      event.clientY -
+      game.lastMouseY
+    ) > 5
+  )
+    return;
+
   const pos =
-    mapCoordinates(event);
+    screenToWorld(event);
 
   /*
-   Auswahl eines Gebäudes
+    Auswahl
   */
 
   if (
@@ -858,138 +1293,43 @@ function handleMapClick(event) {
     "select"
   ) {
 
-    const building =
-      game.buildings.find(
-        b =>
-          pos.x >= b.x &&
-          pos.x <= b.x + 80 &&
-          pos.y >= b.y &&
-          pos.y <= b.y + 80
-      );
+    let selected = null;
 
-    const info =
-      document.querySelector(
-        "#buildingInfo"
-      );
+    for (
+      let i =
+        game.buildings.length - 1;
+      i >= 0;
+      i--
+    ) {
 
-    if (building) {
+      const b =
+        game.buildings[i];
 
-      info.classList.remove(
-        "hidden"
-      );
+      const data =
+        BUILDINGS[b.type];
 
-      info.innerHTML = `
-        <strong>
-          ${buildingName(building.type)}
-        </strong>
-        <br>
-        Stufe: ${building.level}
-        <br>
-        Position:
-        ${Math.round(building.x)},
-        ${Math.round(building.y)}
-      `;
+      if (
+        pos.x >= b.x &&
+        pos.x <=
+          b.x + data.size &&
+        pos.y >= b.y &&
+        pos.y <=
+          b.y + data.size
+      ) {
 
-    } else {
-
-      info.classList.add(
-        "hidden"
-      );
+        selected = b;
+        break;
+      }
     }
 
-    return;
-  }
+    game.selectedBuilding =
+      selected
+        ? selected.id
+        : null;
 
-  buildOnMap(
-    game.selectedTool,
-    pos.x,
-    pos.y
-  );
-}
-
-function buildingName(type) {
-
-  const names = {
-    house: "Wohngebäude",
-    school: "Schule",
-    hospital: "Krankenhaus",
-    industry: "Industrieanlage",
-    station: "Bahnhof",
-    energy: "Kraftwerk",
-    research: "Forschungszentrum"
-  };
-
-  return names[type] ||
-    "Gebäude";
-}
-
-/* =========================
-   BUILD ON MAP
-========================= */
-
-function buildOnMap(
-  type,
-  x,
-  y
-) {
-
-  const costs = {
-
-    house: 1000000,
-
-    industry:
-      1000000000,
-
-    school:
-      30000000,
-
-    hospital:
-      500000000,
-
-    station:
-      300000000,
-
-    energy:
-      1000000000,
-
-    research:
-      500000000,
-
-    road:
-      5000000
-  };
-
-  const cost =
-    costs[type];
-
-  if (
-    game.money < cost
-  ) {
-
-    alert(
-      "Nicht genug Geld."
+    renderInspector(
+      selected
     );
-
-    return;
-  }
-
-  /*
-   Straßen
-  */
-
-  if (type === "road") {
-
-    game.roads.push({
-
-      x1: x - 100,
-      y1: y,
-
-      x2: x + 100,
-      y2: y
-
-    });
-
-    game.money -= cost;
 
     drawMap();
 
@@ -997,74 +1337,152 @@ function buildOnMap(
   }
 
   /*
-   Gebäude
+    Bauen
   */
 
-  game.money -= cost;
+  buildAt(
+    game.selectedTool,
+    pos.x,
+    pos.y
+  );
+}
 
-  game.buildings.push({
+/* =========================
+   BUILD
+========================= */
 
-    id: crypto.randomUUID(),
+function buildAt(
+  type,
+  x,
+  y
+) {
 
-    type,
+  const data =
+    BUILDINGS[type];
 
-    x,
-    y,
+  if (!data)
+    return;
 
-    level: 1
+  if (
+    game.money <
+    data.cost
+  ) {
 
-  });
+    notify(
+      "Nicht genug Geld.",
+      "error"
+    );
+
+    return;
+  }
+
+  game.money -=
+    data.cost;
 
   /*
-   Auswirkungen
+    Straße
   */
 
-  if (type === "house") {
+  if (type === "road") {
 
-    game.housing += 500;
+    game.roads.push({
+      x1: x - 100,
+      y1: y,
+      x2: x + 100,
+      y2: y
+    });
 
-    game.population += 150;
+    notify(
+      "Straße gebaut.",
+      "success"
+    );
 
-    game.satisfaction += 0.2;
+    renderGame();
+
+    return;
   }
 
-  if (type === "industry") {
+  /*
+    Gebäude
+  */
 
-    game.jobs += 1500;
+  const building = {
+    id: crypto.randomUUID(),
+    type,
+    x,
+    y,
+    level: 1
+  };
 
-    game.gdp += 120000000;
+  game.buildings.push(
+    building
+  );
 
-    game.energyConsumption += 0.2;
+  applyBuildingEffects(
+    type
+  );
 
-    game.transport -= 0.2;
-  }
+  game.selectedBuilding =
+    building.id;
 
-  if (type === "school") {
+  notify(
+    `${data.name} gebaut.`,
+    "success"
+  );
 
-    game.education += 1;
-  }
+  renderGame();
 
-  if (type === "hospital") {
+  renderInspector(
+    building
+  );
+}
 
-    game.health += 1;
-  }
+/* =========================
+   EFFECTS
+========================= */
 
-  if (type === "energy") {
+function applyBuildingEffects(
+  type
+) {
 
-    game.energyProduction += 0.3;
-  }
+  const data =
+    BUILDINGS[type];
 
-  if (type === "research") {
+  if (data.housing)
+    game.housing +=
+      data.housing;
 
-    game.education += 1.5;
+  if (data.population)
+    game.population +=
+      data.population;
 
-    game.gdp += 30000000;
-  }
+  if (data.jobs)
+    game.jobs +=
+      data.jobs;
 
-  if (type === "station") {
+  if (data.gdp)
+    game.gdp +=
+      data.gdp;
 
-    game.transport += 2;
-  }
+  if (data.energy)
+    game.energyConsumption +=
+      data.energy;
+
+  if (data.energyProduction)
+    game.energyProduction +=
+      data.energyProduction;
+
+  if (data.transport)
+    game.transport +=
+      data.transport;
+
+  if (data.education)
+    game.education +=
+      data.education;
+
+  if (data.health)
+    game.health +=
+      data.health;
 
   game.education =
     Math.min(
@@ -1078,33 +1496,137 @@ function buildOnMap(
       game.health
     );
 
-  game.satisfaction =
-    Math.min(
-      100,
-      game.satisfaction
+  game.transport =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        game.transport
+      )
     );
-
-  drawMap();
-
-  updateStats();
 }
 
 /* =========================
-   UPDATE STATS
+   INSPECTOR
 ========================= */
 
-function updateStats() {
+function renderInspector(
+  building
+) {
 
-  /*
-   Für den Anfang wird das
-   Dashboard neu gerendert.
-   */
+  const panel =
+    document.querySelector(
+      "#inspector"
+    );
 
-  dashboard();
+  if (!panel)
+    return;
+
+  if (!building) {
+
+    panel.classList.remove(
+      "visible"
+    );
+
+    return;
+  }
+
+  const data =
+    BUILDINGS[building.type];
+
+  panel.classList.add(
+    "visible"
+  );
+
+  panel.innerHTML = `
+    <button
+      class="inspector-close"
+      id="closeInspector">
+      ×
+    </button>
+
+    <h2>
+      ${data.icon}
+      ${data.name}
+    </h2>
+
+    <div class="inspector-sub">
+      Stadtgebiet ${game.city}
+    </div>
+
+    <div class="inspector-row">
+      <span>Stufe</span>
+      <strong>${building.level}</strong>
+    </div>
+
+    <div class="inspector-row">
+      <span>Baukosten</span>
+      <strong>${euro(data.cost)}</strong>
+    </div>
+
+    ${
+      data.jobs
+        ? `
+          <div class="inspector-row">
+            <span>Arbeitsplätze</span>
+            <strong>+${number(data.jobs)}</strong>
+          </div>
+        `
+        : ""
+    }
+
+    ${
+      data.housing
+        ? `
+          <div class="inspector-row">
+            <span>Wohnraum</span>
+            <strong>+${number(data.housing)}</strong>
+          </div>
+        `
+        : ""
+    }
+
+    ${
+      data.energyProduction
+        ? `
+          <div class="inspector-row">
+            <span>Energieproduktion</span>
+            <strong>
+              +${data.energyProduction} TWh
+            </strong>
+          </div>
+        `
+        : ""
+    }
+
+    <div class="info-card">
+      Dieses Gebäude beeinflusst die
+      Entwicklung deiner Stadt.
+      Seine Auswirkungen werden jedes
+      Jahr in die Simulation übernommen.
+    </div>
+  `;
+
+  document
+    .querySelector("#closeInspector")
+    .addEventListener(
+      "click",
+      () => {
+
+        game.selectedBuilding =
+          null;
+
+        panel.classList.remove(
+          "visible"
+        );
+
+        drawMap();
+      }
+    );
 }
 
 /* =========================
-   NEXT YEAR
+   YEAR
 ========================= */
 
 function nextYear() {
@@ -1112,51 +1634,63 @@ function nextYear() {
   const taxRevenue =
     game.gdp * 0.012;
 
-  const operatingCosts =
+  const expenses =
     game.budget * 0.82;
 
   /*
-   Wirtschaft
+    Wirtschaft
   */
 
-  const growth =
+  const economicGrowth =
     0.012 +
     (game.education - 60) /
       10000;
 
   game.gdp *=
-    1 + growth;
+    1 + economicGrowth;
 
   /*
-   Finanzen
+    Finanzen
   */
 
   game.money +=
     taxRevenue -
-    operatingCosts;
+    expenses;
 
   /*
-   Bevölkerung
+    Bevölkerung
   */
+
+  const housingPressure =
+    game.housing /
+    Math.max(
+      1,
+      game.population
+    );
 
   const migration =
     (game.satisfaction - 70) /
-    10000;
+      10000;
 
   game.population *=
     1 +
     0.004 +
-    migration;
+    migration +
+    (
+      housingPressure < .5
+        ? -.002
+        : .001
+    );
 
   /*
-   Arbeitsplätze
+    Arbeitsplätze
   */
 
   game.jobs *=
     1.008;
 
   /*
-   Arbeitslosigkeit
+    Arbeitslosigkeit
   */
 
   game.unemployment =
@@ -1167,39 +1701,67 @@ function nextYear() {
     );
 
   /*
-   Energie
+    Energie
   */
 
   game.energyConsumption *=
     1.01;
-
-  /*
-   Zufriedenheit
-  */
 
   if (
     game.energyProduction <
     game.energyConsumption
   ) {
 
-    game.satisfaction -= 2;
+    game.satisfaction -=
+      2;
+
+    game.gdp *=
+      .995;
+
+    notify(
+      "Energieknappheit belastet die Wirtschaft.",
+      "error"
+    );
 
   } else {
 
-    game.satisfaction += 0.2;
-  }
-
-  if (
-    game.housing <
-    game.population * 0.5
-  ) {
-
-    game.satisfaction -= 1;
+    game.satisfaction +=
+      .2;
   }
 
   /*
-   Grenzen
+    Wohnraum
   */
+
+  if (
+    game.housing <
+    game.population * .5
+  ) {
+
+    game.satisfaction -=
+      1;
+
+    notify(
+      "Wohnraummangel steigt.",
+      "warning"
+    );
+  }
+
+  /*
+    Lebensqualität
+  */
+
+  game.satisfaction +=
+    (
+      game.health -
+      70
+    ) / 1000;
+
+  game.satisfaction +=
+    (
+      game.transport -
+      60
+    ) / 1000;
 
   game.satisfaction =
     Math.max(
@@ -1210,13 +1772,67 @@ function nextYear() {
       )
     );
 
+  /*
+    Jahr
+  */
+
   game.year++;
 
-  dashboard();
+  notify(
+    `Das Jahr ${game.year} hat begonnen.`,
+    "success"
+  );
+
+  renderGame();
+}
+
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+function notify(
+  message,
+  type = "info"
+) {
+
+  game.notifications.unshift({
+    message,
+    type
+  });
+
+  game.notifications =
+    game.notifications.slice(
+      0,
+      5
+    );
+
+  renderNotifications();
+}
+
+function renderNotifications() {
+
+  const container =
+    document.querySelector(
+      "#notifications"
+    );
+
+  if (!container)
+    return;
+
+  container.innerHTML =
+    game.notifications
+      .map(
+        notification => `
+          <div class="notification">
+            ${notification.message}
+          </div>
+        `
+      )
+      .join("");
 }
 
 /* =========================
    START
 ========================= */
 
-startScreen();
+renderStart();
