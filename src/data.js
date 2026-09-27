@@ -111,7 +111,3 @@ export const PROJECTS = {
     research: 5
   }
 };
-
-Wichtig: Der Dateiname muss exakt "src/data.js" sein.
-
-Danach Commit changes drücken. Dann machen wir als Nächstes "src/sim.js".
