@@ -2,13 +2,233 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Vom Nichts zur Metropole</title>
-  <link rel="stylesheet" href="./style.css?v=4">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div id="app"></div>
 
-  <script src="./src/main.js?v=4"></script>
+<body>
+  <div id="game">
+
+    <header class="topbar">
+      <div class="logo">VOM NICHTS ZUR METROPOLE</div>
+
+      <div class="date">
+        <span id="year">2026</span>
+        <button id="nextYear">▶ Jahr abschließen</button>
+      </div>
+
+      <div class="resources">
+        <div><small>GELD</small><b id="money">0 €</b></div>
+        <div><small>BEVÖLKERUNG</small><b id="population">0</b></div>
+        <div><small>BIP</small><b id="gdp">0 €</b></div>
+        <div><small>ENERGIE</small><b id="energy">0 / 0 TWh</b></div>
+      </div>
+    </header>
+
+    <div class="game-layout">
+
+      <aside class="leftbar">
+        <button class="tool active" data-mode="normal">🗺️<span>Karte</span></button>
+        <button class="tool" data-mode="population">👥<span>Bevölkerung</span></button>
+        <button class="tool" data-mode="economy">💰<span>Wirtschaft</span></button>
+        <button class="tool" data-mode="transport">🚆<span>Verkehr</span></button>
+        <button class="tool" data-mode="energy">⚡<span>Energie</span></button>
+        <button class="tool" data-mode="education">🎓<span>Bildung</span></button>
+        <button class="tool" data-mode="health">🏥<span>Gesundheit</span></button>
+        <div class="separator"></div>
+        <button class="tool" id="buildMode">🏗️<span>Bauen</span></button>
+      </aside>
+
+      <main class="map-area">
+
+        <div id="map">
+
+          <div class="river"></div>
+
+          <div class="district downtown">
+            <div class="district-name">ZENTRUM</div>
+          </div>
+
+          <div class="district north">
+            <div class="district-name">NORD</div>
+          </div>
+
+          <div class="district south">
+            <div class="district-name">SÜD</div>
+          </div>
+
+          <div class="district west">
+            <div class="district-name">WEST</div>
+          </div>
+
+          <div class="district east">
+            <div class="district-name">OST</div>
+          </div>
+
+          <div class="road r1"></div>
+          <div class="road r2"></div>
+          <div class="road r3"></div>
+          <div class="road r4"></div>
+          <div class="rail rail1"></div>
+          <div class="rail rail2"></div>
+
+          <div id="buildings"></div>
+
+          <button class="map-label label-center" data-district="Zentrum">
+            <b>STADTZENTRUM</b>
+            <small>Verwaltung · Handel · Dienstleistungen</small>
+          </button>
+
+          <button class="map-label label-north" data-district="Nord">
+            <b>NORD</b>
+            <small>Wohngebiete</small>
+          </button>
+
+          <button class="map-label label-south" data-district="Süd">
+            <b>SÜD</b>
+            <small>Industrie & Logistik</small>
+          </button>
+
+          <button class="map-label label-west" data-district="West">
+            <b>WEST</b>
+            <small>Universität & Forschung</small>
+          </button>
+
+          <button class="map-label label-east" data-district="Ost">
+            <b>OST</b>
+            <small>Neue Stadtteile</small>
+          </button>
+
+        </div>
+
+        <div class="map-controls">
+          <button id="zoomIn">+</button>
+          <button id="zoomOut">−</button>
+          <button id="resetZoom">⌂</button>
+        </div>
+
+        <div class="map-mode">
+          <button class="mode active" data-mode="normal">Politisch</button>
+          <button class="mode" data-mode="population">Bevölkerung</button>
+          <button class="mode" data-mode="economy">Wirtschaft</button>
+          <button class="mode" data-mode="transport">Verkehr</button>
+          <button class="mode" data-mode="energy">Energie</button>
+        </div>
+
+      </main>
+
+      <aside class="right-panel">
+
+        <div id="overview">
+          <div class="panel-title">
+            <span>STADTÜBERSICHT</span>
+            <small id="cityName">Berlin</small>
+          </div>
+
+          <div class="stat">
+            <span>Arbeitslosigkeit</span>
+            <b id="unemployment">0%</b>
+          </div>
+
+          <div class="stat">
+            <span>Zufriedenheit</span>
+            <b id="satisfaction">0%</b>
+          </div>
+
+          <div class="stat">
+            <span>Bildung</span>
+            <b id="education">0</b>
+          </div>
+
+          <div class="stat">
+            <span>Gesundheit</span>
+            <b id="health">0</b>
+          </div>
+
+          <div class="stat">
+            <span>Verkehr</span>
+            <b id="transport">0</b>
+          </div>
+
+          <hr>
+
+          <h3>BAUPROJEKTE</h3>
+          <div id="projects"></div>
+        </div>
+
+        <div id="districtPanel" class="hidden">
+          <button id="closeDistrict">← Übersicht</button>
+          <h2 id="districtTitle">Bezirk</h2>
+          <p id="districtDescription"></p>
+
+          <div class="district-stat">
+            <span>Einwohner</span>
+            <b id="districtPopulation">0</b>
+          </div>
+
+          <div class="district-stat">
+            <span>Gebäude</span>
+            <b id="districtBuildings">0</b>
+          </div>
+
+          <div class="district-stat">
+            <span>Arbeitsplätze</span>
+            <b id="districtJobs">0</b>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <div id="buildMenu" class="build-menu hidden">
+      <div class="build-header">
+        <b>BAUEN</b>
+        <button id="closeBuild">×</button>
+      </div>
+
+      <button class="build-option" data-type="housing" data-cost="500000000">
+        <span>🏠</span>
+        <div><b>Wohnviertel</b><small>+3.000 Einwohner</small></div>
+        <strong>500 Mio. €</strong>
+      </button>
+
+      <button class="build-option" data-type="industry" data-cost="1000000000">
+        <span>🏭</span>
+        <div><b>Industriepark</b><small>+8.000 Arbeitsplätze</small></div>
+        <strong>1 Mrd. €</strong>
+      </button>
+
+      <button class="build-option" data-type="school" data-cost="30000000">
+        <span>🏫</span>
+        <div><b>Schule</b><small>Bildung +2</small></div>
+        <strong>30 Mio. €</strong>
+      </button>
+
+      <button class="build-option" data-type="hospital" data-cost="500000000">
+        <span>🏥</span>
+        <div><b>Krankenhaus</b><small>Gesundheit +3</small></div>
+        <strong>500 Mio. €</strong>
+      </button>
+
+      <button class="build-option" data-type="research" data-cost="500000000">
+        <span>🔬</span>
+        <div><b>Forschungszentrum</b><small>Bildung +3</small></div>
+        <strong>500 Mio. €</strong>
+      </button>
+
+      <button class="build-option" data-type="energy" data-cost="1000000000">
+        <span>⚡</span>
+        <div><b>Solarkraftwerk</b><small>+1,5 TWh</small></div>
+        <strong>1 Mrd. €</strong>
+      </button>
+    </div>
+
+    <div id="notification"></div>
+
+  </div>
+
+  <script src="main.js"></script>
 </body>
 </html>
