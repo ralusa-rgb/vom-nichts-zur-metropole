@@ -2,233 +2,357 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#10161b">
   <title>Vom Nichts zur Metropole</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div id="game">
 
-    <header class="topbar">
-      <div class="logo">VOM NICHTS ZUR METROPOLE</div>
+<div id="app">
 
-      <div class="date">
-        <span id="year">2026</span>
-        <button id="nextYear">▶ Jahr abschließen</button>
-      </div>
+  <header class="topbar">
+    <div class="brand">
+      <strong>VOM NICHTS ZUR METROPOLE</strong>
+      <span>STADTENTWICKLUNG</span>
+    </div>
 
-      <div class="resources">
-        <div><small>GELD</small><b id="money">0 €</b></div>
-        <div><small>BEVÖLKERUNG</small><b id="population">0</b></div>
-        <div><small>BIP</small><b id="gdp">0 €</b></div>
-        <div><small>ENERGIE</small><b id="energy">0 / 0 TWh</b></div>
-      </div>
-    </header>
+    <div class="dateBox">
+      <small>JAHR</small>
+      <b id="year">2026</b>
+      <button id="advance">▶</button>
+    </div>
 
-    <div class="game-layout">
+    <div class="topStats">
+      <div><small>GELD</small><b id="money">0 €</b></div>
+      <div><small>BEVÖLKERUNG</small><b id="population">0</b></div>
+      <div><small>BIP</small><b id="gdp">0 €</b></div>
+      <div><small>ENERGIE</small><b id="energy">0 / 0 TWh</b></div>
+    </div>
 
-      <aside class="leftbar">
-        <button class="tool active" data-mode="normal">🗺️<span>Karte</span></button>
-        <button class="tool" data-mode="population">👥<span>Bevölkerung</span></button>
-        <button class="tool" data-mode="economy">💰<span>Wirtschaft</span></button>
-        <button class="tool" data-mode="transport">🚆<span>Verkehr</span></button>
-        <button class="tool" data-mode="energy">⚡<span>Energie</span></button>
-        <button class="tool" data-mode="education">🎓<span>Bildung</span></button>
-        <button class="tool" data-mode="health">🏥<span>Gesundheit</span></button>
-        <div class="separator"></div>
-        <button class="tool" id="buildMode">🏗️<span>Bauen</span></button>
-      </aside>
+    <button id="mobileInfo" class="mobileButton">☰</button>
+  </header>
 
-      <main class="map-area">
+  <div class="game">
+
+    <aside id="leftPanel" class="leftPanel">
+
+      <button class="sideButton active" data-layer="political">
+        <span>▦</span><small>Karte</small>
+      </button>
+
+      <button class="sideButton" data-layer="population">
+        <span>♟</span><small>Bevölkerung</small>
+      </button>
+
+      <button class="sideButton" data-layer="economy">
+        <span>₿</span><small>Wirtschaft</small>
+      </button>
+
+      <button class="sideButton" data-layer="transport">
+        <span>⌁</span><small>Verkehr</small>
+      </button>
+
+      <button class="sideButton" data-layer="energy">
+        <span>⚡</span><small>Energie</small>
+      </button>
+
+      <button class="sideButton" data-layer="education">
+        <span>◆</span><small>Bildung</small>
+      </button>
+
+      <button class="sideButton" data-layer="health">
+        <span>✚</span><small>Gesundheit</small>
+      </button>
+
+      <div class="sideDivider"></div>
+
+      <button id="buildButton" class="sideButton buildButton">
+        <span>⚒</span><small>Bauen</small>
+      </button>
+
+    </aside>
+
+    <main id="world">
+
+      <div id="camera">
 
         <div id="map">
 
+          <div class="terrain terrain1"></div>
+          <div class="terrain terrain2"></div>
+          <div class="terrain terrain3"></div>
+
           <div class="river"></div>
 
-          <div class="district downtown">
-            <div class="district-name">ZENTRUM</div>
+          <div class="district d-center" data-district="Zentrum">
+            <span>ZENTRUM</span>
           </div>
 
-          <div class="district north">
-            <div class="district-name">NORD</div>
+          <div class="district d-north" data-district="Nord">
+            <span>NORD</span>
           </div>
 
-          <div class="district south">
-            <div class="district-name">SÜD</div>
+          <div class="district d-west" data-district="West">
+            <span>WEST</span>
           </div>
 
-          <div class="district west">
-            <div class="district-name">WEST</div>
+          <div class="district d-east" data-district="Ost">
+            <span>OST</span>
           </div>
 
-          <div class="district east">
-            <div class="district-name">OST</div>
+          <div class="district d-south" data-district="Süd">
+            <span>SÜD</span>
           </div>
 
-          <div class="road r1"></div>
-          <div class="road r2"></div>
-          <div class="road r3"></div>
-          <div class="road r4"></div>
+          <!-- Straßen -->
+          <div class="street street1"></div>
+          <div class="street street2"></div>
+          <div class="street street3"></div>
+          <div class="street street4"></div>
+          <div class="street street5"></div>
+          <div class="street street6"></div>
+          <div class="street street7"></div>
+          <div class="street street8"></div>
+
+          <!-- Hauptstraßen -->
+          <div class="avenue avenue1"></div>
+          <div class="avenue avenue2"></div>
+          <div class="avenue avenue3"></div>
+
+          <!-- Bahn -->
           <div class="rail rail1"></div>
           <div class="rail rail2"></div>
 
+          <!-- Stadtblöcke -->
+          <div class="block b1"></div>
+          <div class="block b2"></div>
+          <div class="block b3"></div>
+          <div class="block b4"></div>
+          <div class="block b5"></div>
+          <div class="block b6"></div>
+          <div class="block b7"></div>
+          <div class="block b8"></div>
+          <div class="block b9"></div>
+          <div class="block b10"></div>
+          <div class="block b11"></div>
+          <div class="block b12"></div>
+          <div class="block b13"></div>
+          <div class="block b14"></div>
+
           <div id="buildings"></div>
 
-          <button class="map-label label-center" data-district="Zentrum">
-            <b>STADTZENTRUM</b>
-            <small>Verwaltung · Handel · Dienstleistungen</small>
-          </button>
-
-          <button class="map-label label-north" data-district="Nord">
-            <b>NORD</b>
-            <small>Wohngebiete</small>
-          </button>
-
-          <button class="map-label label-south" data-district="Süd">
-            <b>SÜD</b>
-            <small>Industrie & Logistik</small>
-          </button>
-
-          <button class="map-label label-west" data-district="West">
-            <b>WEST</b>
-            <small>Universität & Forschung</small>
-          </button>
-
-          <button class="map-label label-east" data-district="Ost">
-            <b>OST</b>
-            <small>Neue Stadtteile</small>
-          </button>
+          <div id="roadsOverlay"></div>
 
         </div>
 
-        <div class="map-controls">
-          <button id="zoomIn">+</button>
-          <button id="zoomOut">−</button>
-          <button id="resetZoom">⌂</button>
-        </div>
-
-        <div class="map-mode">
-          <button class="mode active" data-mode="normal">Politisch</button>
-          <button class="mode" data-mode="population">Bevölkerung</button>
-          <button class="mode" data-mode="economy">Wirtschaft</button>
-          <button class="mode" data-mode="transport">Verkehr</button>
-          <button class="mode" data-mode="energy">Energie</button>
-        </div>
-
-      </main>
-
-      <aside class="right-panel">
-
-        <div id="overview">
-          <div class="panel-title">
-            <span>STADTÜBERSICHT</span>
-            <small id="cityName">Berlin</small>
-          </div>
-
-          <div class="stat">
-            <span>Arbeitslosigkeit</span>
-            <b id="unemployment">0%</b>
-          </div>
-
-          <div class="stat">
-            <span>Zufriedenheit</span>
-            <b id="satisfaction">0%</b>
-          </div>
-
-          <div class="stat">
-            <span>Bildung</span>
-            <b id="education">0</b>
-          </div>
-
-          <div class="stat">
-            <span>Gesundheit</span>
-            <b id="health">0</b>
-          </div>
-
-          <div class="stat">
-            <span>Verkehr</span>
-            <b id="transport">0</b>
-          </div>
-
-          <hr>
-
-          <h3>BAUPROJEKTE</h3>
-          <div id="projects"></div>
-        </div>
-
-        <div id="districtPanel" class="hidden">
-          <button id="closeDistrict">← Übersicht</button>
-          <h2 id="districtTitle">Bezirk</h2>
-          <p id="districtDescription"></p>
-
-          <div class="district-stat">
-            <span>Einwohner</span>
-            <b id="districtPopulation">0</b>
-          </div>
-
-          <div class="district-stat">
-            <span>Gebäude</span>
-            <b id="districtBuildings">0</b>
-          </div>
-
-          <div class="district-stat">
-            <span>Arbeitsplätze</span>
-            <b id="districtJobs">0</b>
-          </div>
-        </div>
-
-      </aside>
-
-    </div>
-
-    <div id="buildMenu" class="build-menu hidden">
-      <div class="build-header">
-        <b>BAUEN</b>
-        <button id="closeBuild">×</button>
       </div>
 
-      <button class="build-option" data-type="housing" data-cost="500000000">
-        <span>🏠</span>
-        <div><b>Wohnviertel</b><small>+3.000 Einwohner</small></div>
-        <strong>500 Mio. €</strong>
-      </button>
+      <div class="mapControls">
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">−</button>
+        <button id="centerMap">⌖</button>
+      </div>
 
-      <button class="build-option" data-type="industry" data-cost="1000000000">
-        <span>🏭</span>
-        <div><b>Industriepark</b><small>+8.000 Arbeitsplätze</small></div>
-        <strong>1 Mrd. €</strong>
-      </button>
+      <div class="mapModes">
+        <button class="mapMode active" data-layer="political">Politisch</button>
+        <button class="mapMode" data-layer="population">Bevölkerung</button>
+        <button class="mapMode" data-layer="economy">Wirtschaft</button>
+        <button class="mapMode" data-layer="transport">Verkehr</button>
+        <button class="mapMode" data-layer="energy">Energie</button>
+      </div>
 
-      <button class="build-option" data-type="school" data-cost="30000000">
-        <span>🏫</span>
-        <div><b>Schule</b><small>Bildung +2</small></div>
-        <strong>30 Mio. €</strong>
-      </button>
+      <div id="coordinates">STADT · ZENTRUM</div>
 
-      <button class="build-option" data-type="hospital" data-cost="500000000">
-        <span>🏥</span>
-        <div><b>Krankenhaus</b><small>Gesundheit +3</small></div>
-        <strong>500 Mio. €</strong>
-      </button>
+    </main>
 
-      <button class="build-option" data-type="research" data-cost="500000000">
-        <span>🔬</span>
-        <div><b>Forschungszentrum</b><small>Bildung +3</small></div>
-        <strong>500 Mio. €</strong>
-      </button>
+    <aside id="rightPanel" class="rightPanel">
 
-      <button class="build-option" data-type="energy" data-cost="1000000000">
-        <span>⚡</span>
-        <div><b>Solarkraftwerk</b><small>+1,5 TWh</small></div>
-        <strong>1 Mrd. €</strong>
-      </button>
-    </div>
+      <section id="overview">
 
-    <div id="notification"></div>
+        <div class="panelHeader">
+          <small>STADT</small>
+          <h2>Berlin</h2>
+        </div>
+
+        <div class="quickStats">
+          <div>
+            <small>ARBEITSLOSIGKEIT</small>
+            <strong id="unemployment">9,0%</strong>
+          </div>
+
+          <div>
+            <small>ZUFRIEDENHEIT</small>
+            <strong id="satisfaction">72%</strong>
+          </div>
+
+          <div>
+            <small>BILDUNG</small>
+            <strong id="education">65</strong>
+          </div>
+
+          <div>
+            <small>GESUNDHEIT</small>
+            <strong id="health">70</strong>
+          </div>
+        </div>
+
+        <div class="panelSection">
+          <div class="sectionTitle">
+            <span>STADTENTWICKLUNG</span>
+          </div>
+
+          <div class="barStat">
+            <span>Verkehr</span>
+            <div><i id="transportBar"></i></div>
+            <b id="transport">60</b>
+          </div>
+
+          <div class="barStat">
+            <span>Bildung</span>
+            <div><i id="educationBar"></i></div>
+            <b id="education2">65</b>
+          </div>
+
+          <div class="barStat">
+            <span>Gesundheit</span>
+            <div><i id="healthBar"></i></div>
+            <b id="health2">70</b>
+          </div>
+        </div>
+
+        <div class="panelSection">
+          <div class="sectionTitle">
+            <span>LETZTE BAUPROJEKTE</span>
+          </div>
+
+          <div id="projectList"></div>
+        </div>
+
+      </section>
+
+      <section id="districtPanel" class="hidden">
+
+        <button id="backOverview" class="backButton">
+          ← Stadtübersicht
+        </button>
+
+        <div class="panelHeader">
+          <small>BEZIRK</small>
+          <h2 id="districtName">Zentrum</h2>
+        </div>
+
+        <p id="districtDescription"></p>
+
+        <div class="districtRows">
+          <div><span>Einwohner</span><b id="districtPopulation">0</b></div>
+          <div><span>Arbeitsplätze</span><b id="districtJobs">0</b></div>
+          <div><span>Gebäude</span><b id="districtBuildings">0</b></div>
+        </div>
+
+      </section>
+
+      <section id="buildingPanel" class="hidden">
+
+        <button id="backFromBuilding" class="backButton">
+          ← Zurück
+        </button>
+
+        <div class="buildingBigIcon" id="selectedIcon">🏠</div>
+
+        <div class="panelHeader">
+          <small>GEBÄUDE</small>
+          <h2 id="selectedName">Wohnviertel</h2>
+        </div>
+
+        <p id="selectedDistrict"></p>
+
+        <div id="buildingDetails"></div>
+
+      </section>
+
+    </aside>
 
   </div>
 
-  <script src="main.js"></script>
+  <div id="buildMenu" class="buildMenu hidden">
+
+    <div class="buildMenuHeader">
+      <div>
+        <small>STADTENTWICKLUNG</small>
+        <h2>Bauen</h2>
+      </div>
+      <button id="closeBuild">×</button>
+    </div>
+
+    <p class="buildHint">
+      Wähle ein Gebäude und tippe anschließend auf einen geeigneten Bauplatz.
+    </p>
+
+    <div class="buildCards">
+
+      <button class="buildCard" data-type="housing">
+        <span class="icon">🏘</span>
+        <span>
+          <b>Wohnviertel</b>
+          <small>+3.000 Einwohner</small>
+        </span>
+        <strong>500 Mio.</strong>
+      </button>
+
+      <button class="buildCard" data-type="industry">
+        <span class="icon">🏭</span>
+        <span>
+          <b>Industrie</b>
+          <small>+8.000 Arbeitsplätze</small>
+        </span>
+        <strong>1 Mrd.</strong>
+      </button>
+
+      <button class="buildCard" data-type="school">
+        <span class="icon">🏫</span>
+        <span>
+          <b>Schule</b>
+          <small>Bildung +2</small>
+        </span>
+        <strong>30 Mio.</strong>
+      </button>
+
+      <button class="buildCard" data-type="hospital">
+        <span class="icon">🏥</span>
+        <span>
+          <b>Krankenhaus</b>
+          <small>Gesundheit +3</small>
+        </span>
+        <strong>500 Mio.</strong>
+      </button>
+
+      <button class="buildCard" data-type="research">
+        <span class="icon">🔬</span>
+        <span>
+          <b>Forschungszentrum</b>
+          <small>Bildung +3 · BIP +250 Mio.</small>
+        </span>
+        <strong>500 Mio.</strong>
+      </button>
+
+      <button class="buildCard" data-type="energy">
+        <span class="icon">⚡</span>
+        <span>
+          <b>Solarkraftwerk</b>
+          <small>+1,5 TWh</small>
+        </span>
+        <strong>1 Mrd.</strong>
+      </button>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+</div>
+
+<script src="main.js"></script>
 </body>
 </html>
